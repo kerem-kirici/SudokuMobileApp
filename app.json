@@ -7,16 +7,28 @@
     "icon": "./assets/images/icon.png",
     "scheme": "sudoku",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.keremkirici.Sudoku",
+      "splash": {
+        "image": "./assets/images/splash-icon.png",
+        "imageWidth": 200,
+        "backgroundColor": "#0B1A2E"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0B1A2E"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.keremkirici.Sudoku",
+      "splash": {
+        "image": "./assets/images/splash-icon.png",
+        "imageWidth": 200,
+        "backgroundColor": "#0B1A2E"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +43,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#0B1A2E"
         }
       ]
     ],
