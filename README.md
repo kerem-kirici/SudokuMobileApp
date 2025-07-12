@@ -161,9 +161,9 @@ The app uses a comprehensive color scheme with semantic naming:
 - **State Optimization**: Efficient state structure and updates
 
 ### Asset Optimization
-- **Optimized Screenshots**: README images compressed to ~50KB each (94% size reduction)
+- **Optimized Screenshots**: README images compressed to ~130KB each (85% size reduction)
 - **Fast Loading**: Optimized for quick repository browsing
-- **GitHub Friendly**: Small file sizes for better performance
+- **GitHub Friendly**: Reasonable file sizes for better performance
 
 ## 📊 Features in Detail
 
@@ -191,7 +191,7 @@ The app uses a comprehensive color scheme with semantic naming:
 
 ### Performance Improvements
 - **Action Queue System**: Prevents rapid input conflicts and missed interactions
-- **Optimized Screenshots**: Reduced README image sizes by 94% for faster loading
+- **Optimized Screenshots**: Reduced README image sizes by 85% for faster loading
 - **Centralized Color Scheme**: Unified theming system for consistent design
 - **Enhanced Modals**: Improved completion and game over modals
 
