@@ -34,19 +34,16 @@ A beautiful, feature-rich Sudoku game built with React Native and Expo. Experien
 ## 📱 Screenshots
 
 ### Home Page Interface
-![Sudoku App Homepage](assets/images/simulator_screenshot_homepage.png)
+![Sudoku App Homepage](assets/images/simulator_screenshot_homepage.png)![Difficulty Selection](assets/images/simulator_screenshot_difficulty.png)
 
 ### Main Game Interface
 ![Game Interface](assets/images/simulator_screenshot_game_page.png)
 
-### Difficulty Selection
-![Difficulty Selection](assets/images/simulator_screenshot_difficulty.png)
-
 ### Statistics & Progress
-![Statistics Overview](assets/images/simulator_screenshot_stats_all.png)
+![Statistics Overview](assets/images/simulator_screenshot_stats_all.png)![Statistics by Difficulty](assets/images/simulator_screenshot_stats_medium.png)
 
 ### Statistics by Difficulty
-![Statistics by Difficulty](assets/images/simulator_screenshot_stats_medium.png)
+
 
 ## 🚀 Getting Started
 
