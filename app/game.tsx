@@ -1,5 +1,5 @@
 import { ClearCurrentPuzzleCache, SetCurrentPuzzle } from '@/api/PuzzleManager';
-import { StatisticsManager } from '@/api/StatisticsManager';
+import { Difficulty, StatisticsManager } from '@/api/StatisticsManager';
 import { MoveHistory, Sudoku } from '@/types/sudoku';
 import { Colors } from '@/types/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -333,7 +333,7 @@ export default function GameScreen() {
     if (!isComplete && isPuzzleComplete(sudoku.puzzle)) {
       setIsComplete(true);
       // Record completed game statistics
-      StatisticsManager.recordCompletedGame(elapsedTime);
+      StatisticsManager.recordCompletedGame(elapsedTime, sudoku.difficulty as Difficulty);
     }
   }, [sudoku.puzzle, isComplete, elapsedTime]);
 
@@ -343,7 +343,7 @@ export default function GameScreen() {
       setIsGameOver(true);
       
       // Record lost game statistics
-      StatisticsManager.recordLostGame(elapsedTime);
+      StatisticsManager.recordLostGame(elapsedTime, sudoku.difficulty as Difficulty);
     }
   }, [mistakes, isGameOver, elapsedTime]);
 
@@ -456,6 +456,7 @@ export default function GameScreen() {
     setElapsedTime(0);
     setIsTimerRunning(true);
     setMistakes(0);
+    setNumberCounter(initialNumberCounter);
   };
 
   const handleBackToMenu = async () => {
@@ -539,7 +540,7 @@ export default function GameScreen() {
               <View style={styles.infoContainer}>
                 <View style={styles.difficultySection}>
                   <Ionicons name="beer" size={18} color={Colors.icon.secondary} />
-                  <Text style={styles.difficultyText}>Hard</Text>
+                  <Text style={styles.difficultyText}>{sudoku.difficulty.charAt(0).toUpperCase() + sudoku.difficulty.slice(1)}</Text>
                 </View>
                 <View style={styles.mistakesSection}>
                   <Ionicons name="close-circle" size={18} color={Colors.icon.error} />

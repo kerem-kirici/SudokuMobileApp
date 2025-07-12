@@ -1,4 +1,4 @@
-import { GameRecord, GameStats, StatisticsManager } from '@/api/StatisticsManager';
+import { Difficulty, GameRecord, GameStats, StatisticsManager } from '@/api/StatisticsManager';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -13,15 +13,29 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { PanGestureHandler } from 'react-native-gesture-handler';
+import {
+  runOnJS,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+
+type TabType = 'Overall' | 'Easy' | 'Medium' | 'Hard';
 
 export default function StatisticsScreen() {
   const router = useRouter();
+  const [currentTab, setCurrentTab] = useState<TabType>('Overall');
   const [stats, setStats] = useState<GameStats | null>(null);
   const [recentGames, setRecentGames] = useState<GameRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
+  const translateX = useSharedValue(0);
+
+  const tabs: TabType[] = ['Overall', 'Easy', 'Medium', 'Hard'];
 
   useEffect(() => {
     fadeAnim.setValue(0);
@@ -44,15 +58,27 @@ export default function StatisticsScreen() {
 
   useEffect(() => {
     loadStatistics();
-  }, []);
+  }, [currentTab]);
 
   const loadStatistics = async () => {
     try {
       setLoading(true);
-      const [statsData, recentGamesData] = await Promise.all([
-        StatisticsManager.getStats(),
-        StatisticsManager.getRecentGames(),
-      ]);
+      let statsData: GameStats;
+      let recentGamesData: GameRecord[];
+
+      if (currentTab === 'Overall') {
+        [statsData, recentGamesData] = await Promise.all([
+          StatisticsManager.getOverallStats(),
+          StatisticsManager.getRecentGames(),
+        ]);
+      } else {
+        const difficulty = currentTab as Difficulty;
+        [statsData, recentGamesData] = await Promise.all([
+          StatisticsManager.getStatsForDifficulty(difficulty),
+          StatisticsManager.getRecentGamesForDifficulty(difficulty),
+        ]);
+      }
+
       setStats(statsData);
       setRecentGames(recentGamesData);
     } catch (error) {
@@ -65,7 +91,7 @@ export default function StatisticsScreen() {
   const handleClearStats = () => {
     Alert.alert(
       'Clear Statistics',
-      'Are you sure you want to clear all statistics? This action cannot be undone.',
+      `Are you sure you want to clear ${currentTab === 'Overall' ? 'all' : currentTab.toLowerCase()} statistics? This action cannot be undone.`,
       [
         {
           text: 'Cancel',
@@ -76,9 +102,13 @@ export default function StatisticsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await StatisticsManager.clearStats();
+              if (currentTab === 'Overall') {
+                await StatisticsManager.clearStats();
+              } else {
+                await StatisticsManager.clearStatsForDifficulty(currentTab as Difficulty);
+              }
               await loadStatistics();
-              Alert.alert('Success', 'Statistics cleared successfully!');
+              Alert.alert('Success', `Statistics cleared successfully!`);
             } catch (error) {
               console.error('Error clearing stats:', error);
               Alert.alert('Error', 'Failed to clear statistics.');
@@ -89,9 +119,54 @@ export default function StatisticsScreen() {
     );
   };
 
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (_, context: any) => {
+      context.startX = translateX.value;
+    },
+    onActive: (event, context: any) => {
+      translateX.value = context.startX + event.translationX;
+    },
+    onEnd: (event) => {
+      const currentIndex = tabs.indexOf(currentTab);
+      let newIndex = currentIndex;
+
+      if (event.translationX < -50 && currentIndex < tabs.length - 1) {
+        newIndex = currentIndex + 1;
+      } else if (event.translationX > 50 && currentIndex > 0) {
+        newIndex = currentIndex - 1;
+      }
+
+      if (newIndex !== currentIndex) {
+        translateX.value = withSpring(0);
+        runOnJS(setCurrentTab)(tabs[newIndex]);
+      } else {
+        translateX.value = withSpring(0);
+      }
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getTabColor = (tab: TabType) => {
+    switch (tab) {
+      case 'Easy':
+        return '#4CAF50';
+      case 'Medium':
+        return '#FF9800';
+      case 'Hard':
+        return '#F44336';
+      default:
+        return '#e94560';
+    }
   };
 
   if (loading) {
@@ -142,10 +217,40 @@ export default function StatisticsScreen() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Tab Navigator */}
+        <View style={styles.tabContainer}>
+          <PanGestureHandler onGestureEvent={gestureHandler}>
+            <Animated.View style={[styles.tabContent, animatedStyle]}>
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={[
+                    styles.tab,
+                    currentTab === tab && styles.activeTab,
+                    currentTab === tab && { borderBottomColor: getTabColor(tab) }
+                  ]}
+                  onPress={() => setCurrentTab(tab)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[
+                    styles.tabText,
+                    currentTab === tab && styles.activeTabText,
+                    currentTab === tab && { color: getTabColor(tab) }
+                  ]}>
+                    {tab}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </Animated.View>
+          </PanGestureHandler>
+        </View>
+
+        <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Overall Statistics */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Overall Statistics</Text>
+            <Text style={styles.sectionTitle}>
+              {currentTab === 'Overall' ? 'Overall Statistics' : `${currentTab} Statistics`}
+            </Text>
             <View style={styles.statsGrid}>
               <View style={[styles.statCard, styles.gamesPlayedCard]}>
                 <Text style={styles.statValue}>{stats?.totalGamesPlayed || 0}</Text>
@@ -206,12 +311,21 @@ export default function StatisticsScreen() {
 
           {/* Recent Games */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent Games</Text>
+            <Text style={styles.sectionTitle}>
+              {currentTab === 'Overall' ? 'Recent Games' : `Recent ${currentTab} Games`}
+            </Text>
             {recentGames.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="stats-chart-outline" size={48} color="rgba(255, 255, 255, 0.3)" />
-                <Text style={styles.emptyText}>No games played yet</Text>
-                <Text style={styles.emptySubtext}>Complete your first game to see statistics here!</Text>
+                <Text style={styles.emptyText}>
+                  {currentTab === 'Overall' ? 'No games played yet' : `No ${currentTab.toLowerCase()} games played yet`}
+                </Text>
+                <Text style={styles.emptySubtext}>
+                  {currentTab === 'Overall' 
+                    ? 'Complete your first game to see statistics here!' 
+                    : `Complete your first ${currentTab.toLowerCase()} game to see statistics here!`
+                  }
+                </Text>
               </View>
             ) : (
               <View style={styles.recentGames}>
@@ -219,6 +333,11 @@ export default function StatisticsScreen() {
                   <View key={game.id} style={styles.gameRecord}>
                     <View style={styles.gameInfo}>
                       <Text style={styles.gameDate}>{formatDate(game.completedAt)}</Text>
+                      {game.difficulty && (
+                        <Text style={[styles.gameDifficulty, { color: getTabColor(game.difficulty) }]}>
+                          {game.difficulty}
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.gameStats}>
                       {game.completed && (
@@ -278,6 +397,38 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   content: {
+    flex: 1,
+  },
+  tabContainer: {
+    marginBottom: 20,
+  },
+  tabContent: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  activeTabText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  scrollContent: {
     flex: 1,
   },
   section: {
@@ -355,6 +506,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     marginBottom: 4,
+  },
+  gameDifficulty: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   gameStats: {
     alignItems: 'flex-end',

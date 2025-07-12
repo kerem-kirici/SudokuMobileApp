@@ -34,13 +34,19 @@ A beautiful, feature-rich Sudoku game built with React Native and Expo. Experien
 ## 📱 Screenshots
 
 ### Home Page Interface
-![Sudoku App](assets/images/simulator_screenshot_6CF29BE8-1BC0-4A95-8CE1-D5A8AD882202.png)
+![Sudoku App Homepage](assets/images/simulator_screenshot_homepage.png)
 
 ### Main Game Interface
-![Game Inderface](assets/images/simulator_screenshot_66406F0E-861D-4ECC-BEBE-A86838507C07.png)
+![Game Interface](assets/images/simulator_screenshot_game_page.png)
+
+### Difficulty Selection
+![Difficulty Selection](assets/images/simulator_screenshot_difficulty.png)
 
 ### Statistics & Progress
-![Statistics](assets/images/simulator_screenshot_C7023D23-8125-48C3-80AF-40099B9AA323.png)
+![Statistics Overview](assets/images/simulator_screenshot_stats_all.png)
+
+### Statistics by Difficulty
+![Statistics by Difficulty](assets/images/simulator_screenshot_stats_medium.png)
 
 ## 🚀 Getting Started
 
@@ -163,7 +169,7 @@ The app uses a comprehensive color scheme with semantic naming:
 - **State Optimization**: Efficient state structure and updates
 
 ### Asset Optimization
-- **High-Quality Screenshots**: README images optimized to ~200KB each with excellent quality
+- **High-Quality Screenshots**: README images optimized to ~60-120KB each at 600px width with excellent quality
 - **Fast Loading**: Optimized for quick repository browsing
 - **GitHub Friendly**: Balanced file sizes for optimal performance and quality
 
@@ -175,7 +181,6 @@ The app uses a comprehensive color scheme with semantic naming:
   - Easy: 40-50 empty cells
   - Medium: 50-60 empty cells
   - Hard: 60-70 empty cells
-  - Expert: 70+ empty cells
 
 ### Smart Features
 - **Auto-Highlighting**: Highlights related cells (same row, column, box)

@@ -1,6 +1,7 @@
 import { EnsurePuzzleCache, GetCurrentPuzzle, GetRandomPuzzle } from '@/api/PuzzleManager';
-import { StatisticsManager } from '@/api/StatisticsManager';
+import { Difficulty, StatisticsManager } from '@/api/StatisticsManager';
 import generateSudoku from '@/api/SudokuFetchAPI';
+import DifficultySelector from '@/components/DifficultySelector';
 import { Sudoku } from '@/types/sudoku';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -8,15 +9,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  Dimensions,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -25,7 +26,9 @@ export default function WelcomeScreen() {
   const scaleAnim = new Animated.Value(0.8);
 
   const [previousPuzzleExists, setPreviousPuzzleExists] = useState(false);
+  const [previousPuzzleDifficulty, setPreviousPuzzleDifficulty] = useState<Difficulty | null>(null);
   const [previousPuzzleFetched, setPreviousPuzzleFetched] = useState(false);
+  const [showDifficultySelector, setShowDifficultySelector] = useState(false);
 
   useEffect(() => {
     if (previousPuzzleFetched) {
@@ -67,6 +70,7 @@ export default function WelcomeScreen() {
           const puzzle = await GetCurrentPuzzle();
           console.log('Previous puzzle exists:', Boolean(puzzle));
           setPreviousPuzzleExists(Boolean(puzzle));
+          setPreviousPuzzleDifficulty(puzzle?.difficulty as Difficulty || null);
         } catch (error) {
           console.error('Error fetching current puzzle:', error);
           // Don't crash the app if puzzle fetch fails
@@ -78,21 +82,82 @@ export default function WelcomeScreen() {
     }, [])
   );
 
-  const handleStartGame = async () => {
+  const handleStartGame = () => {
+    setShowDifficultySelector(true);
+  };
+
+  const checkNetworkConnectivity = async (): Promise<boolean> => {
+    try {
+      // Try to fetch a small resource to test network connectivity
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      const response = await fetch('https://httpbin.org/status/200', {
+        method: 'HEAD',
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      return response.ok;
+    } catch (error) {
+      console.log('Network connectivity check failed:', error);
+      return false;
+    }
+  };
+
+  const handleDifficultySelect = async (difficulty: Difficulty) => {
     // Check if there's a previous game that will be abandoned
-    if (previousPuzzleExists) {
-      // Record the abandoned game with estimated time (you might want to store actual time in the puzzle)
-      await StatisticsManager.recordAbandonedGame();
+    if (previousPuzzleExists && previousPuzzleDifficulty) {
+      // Record the abandoned game with the previous puzzle's difficulty
+      await StatisticsManager.recordAbandonedGame(previousPuzzleDifficulty);
     }
     
-    // If there is a puzzle in the cache, use it
-    let puzzle = await GetRandomPuzzle();
+    // Get a puzzle of the selected difficulty
+    let puzzle = await GetRandomPuzzle(difficulty);
+    
     if (!puzzle) {
-      puzzle = await generateSudoku();
+      // Check network connectivity before trying to generate a new puzzle
+      const isNetworkAvailable = await checkNetworkConnectivity();
+      
+      if (!isNetworkAvailable) {
+        Alert.alert(
+          'No Network Connection',
+          'There are no puzzles available offline and no network connection to fetch new puzzles. Please check your internet connection and try again.',
+          [
+            {
+              text: 'OK',
+              style: 'default',
+            },
+          ]
+        );
+        return;
+      }
+      
+      // If network is available, try to generate a new puzzle
+      try {
+        puzzle = await generateSudoku();
+        // Ensure the puzzle cache is maintained
+        EnsurePuzzleCache();
+      } catch (error) {
+        console.error('Failed to generate new puzzle:', error);
+        Alert.alert(
+          'Error',
+          'Failed to fetch a new puzzle. Please check your internet connection and try again.',
+          [
+            {
+              text: 'OK',
+              style: 'default',
+            },
+          ]
+        );
+        return;
+      }
     } else {
+      // Ensure puzzle cache is maintained
       EnsurePuzzleCache();
     }
-    // Navigate to game screen with the current puzzle
+    
+    // Navigate to game screen with the selected puzzle
     router.push({
       pathname: '/game', 
       params: {initialSudoku: JSON.stringify(puzzle)}
@@ -195,6 +260,13 @@ export default function WelcomeScreen() {
           </View>
         </View>
       </LinearGradient>
+
+      {/* Difficulty Selector */}
+      <DifficultySelector
+        visible={showDifficultySelector}
+        onClose={() => setShowDifficultySelector(false)}
+        onSelectDifficulty={handleDifficultySelect}
+      />
     </View>
   );
 }

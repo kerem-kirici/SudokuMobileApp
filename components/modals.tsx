@@ -72,7 +72,7 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>🎉 Congratulations Kerem!</Text>
-          <Text style={styles.modalSubtitle}>You've solved the Sudoku puzzle!</Text>
+          <Text style={styles.modalSubtitle}>You&apos;ve solved the Sudoku puzzle!</Text>
           <Text style={styles.modalTime}>Time: {formatTime(elapsedTime)}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity

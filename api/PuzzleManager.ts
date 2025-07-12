@@ -4,61 +4,81 @@ import generateSudoku from './SudokuFetchAPI';
 
 const ALL_PUZZLES_STORAGE_KEY = 'all_sudoku_puzzles';
 const CURRENT_PUZZLE_STORAGE_KEY = 'current_sudoku_puzzle';
-const MIN_PUZZLES = 15;
+const MIN_PUZZLES_PER_DIFFICULTY = 10;
+
+interface PuzzleCache {
+  hard: Sudoku[];
+  medium: Sudoku[];
+  easy: Sudoku[];
+}
 
 export async function EnsurePuzzleCache() {
   try {
     // Get existing puzzles from storage
     const storedPuzzlesJson = await AsyncStorage.getItem(ALL_PUZZLES_STORAGE_KEY);
-    const existingPuzzles: Sudoku[] = storedPuzzlesJson 
-      ? JSON.parse(storedPuzzlesJson) 
-      : [];
-
-    // Filter to only keep hard difficulty puzzles
-    const hardPuzzles = existingPuzzles.filter(puzzle => puzzle.difficulty === 'Hard');
+    let existingPuzzleCache: PuzzleCache;
     
-    // Check if we need more puzzles
-    if (hardPuzzles.length < MIN_PUZZLES) {
-      const puzzlesNeeded = MIN_PUZZLES - hardPuzzles.length;
-      let puzzlesFound = 0;
-      console.log(`Fetching ${puzzlesNeeded} new hard puzzles...`);
+    if (storedPuzzlesJson) {
+      const parsed = JSON.parse(storedPuzzlesJson);
+      // Ensure all difficulty arrays exist
+      existingPuzzleCache = {
+        hard: parsed.hard || [],
+        medium: parsed.medium || [],
+        easy: parsed.easy || [],
+      };
+    } else {
+      existingPuzzleCache = { hard: [], medium: [], easy: [] };
+    }
+
+    console.log('Current cache state:', {
+      hard: existingPuzzleCache.hard.length,
+      medium: existingPuzzleCache.medium.length,
+      easy: existingPuzzleCache.easy.length,
+    });
+
+    // Check if we need more puzzles for each difficulty
+    const difficulties = ['hard', 'medium', 'easy'] as const;
+    let totalPuzzlesNeeded = 0;
+    
+    difficulties.forEach(difficulty => {
+      const currentCount = existingPuzzleCache[difficulty].length;
+      if (currentCount < MIN_PUZZLES_PER_DIFFICULTY) {
+        totalPuzzlesNeeded += MIN_PUZZLES_PER_DIFFICULTY - currentCount;
+      }
+    });
+    
+    if (totalPuzzlesNeeded > 0) {
+      console.log(`Fetching ${totalPuzzlesNeeded} new puzzles across all difficulties...`);
       
-      const newPuzzles: Sudoku[] = [];
+      let puzzlesFound = 0;
+
       
       // Fetch new puzzles
-      while (puzzlesFound < puzzlesNeeded) {
+      while (puzzlesFound < totalPuzzlesNeeded) {
         try {
           const puzzleData = await generateSudoku();
+          const difficulty = puzzleData.difficulty.toLowerCase() as keyof PuzzleCache;
           
-          // Only store hard difficulty puzzles
-          if (puzzleData.difficulty === 'Hard') {
-            newPuzzles.push(puzzleData);
+          // Check if we need more puzzles of this difficulty
+          if (existingPuzzleCache[difficulty].length < MIN_PUZZLES_PER_DIFFICULTY) {
+            existingPuzzleCache[difficulty].push(puzzleData);
             puzzlesFound++;
-              
-            // Combine existing and new puzzles
-            const allPuzzles = [...hardPuzzles, ...newPuzzles];
             
-            // Store updated puzzle cache
-            await AsyncStorage.setItem(ALL_PUZZLES_STORAGE_KEY, JSON.stringify(allPuzzles));
+            // Store updated puzzle cache after each successful addition
+            await AsyncStorage.setItem(ALL_PUZZLES_STORAGE_KEY, JSON.stringify(existingPuzzleCache));
+            console.log(`Added ${difficulty} puzzle. Total ${difficulty}: ${existingPuzzleCache[difficulty].length}`);
           }
         
         } catch (error) {
           console.error(`Failed to fetch puzzle: `, error);
         }
-        
         // Add small delay between requests to be respectful to the API
         await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      // Combine existing and new puzzles
-      const allPuzzles = [...hardPuzzles, ...newPuzzles];
-      
-      // Store updated puzzle cache
-      await AsyncStorage.setItem(ALL_PUZZLES_STORAGE_KEY, JSON.stringify(allPuzzles));
-      
-      console.log(`Puzzle cache updated: ${allPuzzles.length} hard puzzles available`);
+      console.log(`Puzzle cache updated: ${existingPuzzleCache.hard.length} hard, ${existingPuzzleCache.medium.length} medium, ${existingPuzzleCache.easy.length} easy puzzles available`);
     } else {
-      console.log(`Puzzle cache sufficient: ${hardPuzzles.length} puzzles available`);
+      console.log(`Puzzle cache sufficient: ${existingPuzzleCache.hard.length} hard, ${existingPuzzleCache.medium.length} medium, ${existingPuzzleCache.easy.length} easy puzzles available`);
     }
     
     return true;
@@ -68,27 +88,59 @@ export async function EnsurePuzzleCache() {
   }
 }
 
-export async function GetRandomPuzzle(): Promise<Sudoku | null> {
+export async function GetRandomPuzzle(difficulty?: 'Hard' | 'Medium' | 'Easy'): Promise<Sudoku | null> {
   try {
     const storedPuzzlesJson = await AsyncStorage.getItem(ALL_PUZZLES_STORAGE_KEY);
-    const puzzles: Sudoku[] = storedPuzzlesJson 
-      ? JSON.parse(storedPuzzlesJson) 
-      : [];
+    let puzzleCache: PuzzleCache;
     
-    if (puzzles.length === 0) {
+    if (storedPuzzlesJson) {
+      const parsed = JSON.parse(storedPuzzlesJson);
+      // Ensure all difficulty arrays exist
+      puzzleCache = {
+        hard: parsed.hard || [],
+        medium: parsed.medium || [],
+        easy: parsed.easy || [],
+      };
+    } else {
+      puzzleCache = { hard: [], medium: [], easy: [] };
+    }
+    
+    let availablePuzzles: Sudoku[] = [];
+    
+    if (difficulty) {
+      // Get puzzles of specific difficulty
+      const difficultyKey = difficulty.toLowerCase() as keyof PuzzleCache;
+      availablePuzzles = puzzleCache[difficultyKey];
+    } else {
+      // Get puzzles from all difficulties
+      availablePuzzles = [
+        ...puzzleCache.hard,
+        ...puzzleCache.medium,
+        ...puzzleCache.easy
+      ];
+    }
+    
+    if (availablePuzzles.length === 0) {
+      console.log(`No puzzles available for difficulty: ${difficulty || 'any'}`);
       return null;
     }
     
     // Return a random puzzle and remove it from cache
-    const randomIndex = Math.floor(Math.random() * puzzles.length);
-    const selectedPuzzle = puzzles[randomIndex];
+    const randomIndex = Math.floor(Math.random() * availablePuzzles.length);
+    const selectedPuzzle = availablePuzzles[randomIndex];
     
-    // Remove the selected puzzle from the array
-    puzzles.splice(randomIndex, 1);
+    // Remove the selected puzzle from the appropriate difficulty array
+    const difficultyKey = selectedPuzzle.difficulty.toLowerCase() as keyof PuzzleCache;
+    const puzzleIndex = puzzleCache[difficultyKey].findIndex(p => p.id === selectedPuzzle.id);
+    if (puzzleIndex !== -1) {
+      puzzleCache[difficultyKey].splice(puzzleIndex, 1);
+    }
     
     // Update the cache with the remaining puzzles
-    await AsyncStorage.setItem(ALL_PUZZLES_STORAGE_KEY, JSON.stringify(puzzles));
+    await AsyncStorage.setItem(ALL_PUZZLES_STORAGE_KEY, JSON.stringify(puzzleCache));
     await AsyncStorage.setItem(CURRENT_PUZZLE_STORAGE_KEY, JSON.stringify(selectedPuzzle));
+    
+    console.log(`Selected puzzle: ${selectedPuzzle.difficulty}, Remaining: ${puzzleCache.hard.length}H, ${puzzleCache.medium.length}M, ${puzzleCache.easy.length}E`);
     return selectedPuzzle;
   } catch (error) {
     console.error('Error getting random puzzle:', error);

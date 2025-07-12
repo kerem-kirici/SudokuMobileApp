@@ -1,11 +1,11 @@
 export interface MoveHistory {
-  previousPuzzle: Array<Array<number | Array<number>>>;
+  previousPuzzle: (number | number[])[][];
   previousSelectedCell: [number, number];
 }
 
 export type Sudoku = {
-  initialPuzzle: Array<Array<number | Array<number>>>;
-  puzzle: Array<Array<number | Array<number>>>;
+  initialPuzzle: (number | number[])[][];
+  puzzle: (number | number[])[][];
   solution: number[][];
   puzzleHistory: MoveHistory[];
   difficulty: string;

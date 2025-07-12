@@ -14,7 +14,7 @@ export default function SudokuGrid({
   selectedCell, 
   onCellPress 
 }: SudokuGridProps) {
-  const renderCell = (value: number | Array<number>, row: number, col: number) => {
+  const renderCell = (value: number | number[], row: number, col: number) => {
     const isSelected = selectedCell && selectedCell[0] === row && selectedCell[1] === col;
     const isOriginal = sudoku.initialPuzzle[row][col] !== 0;
     const isInSameRow = selectedCell && selectedCell[0] === row;
