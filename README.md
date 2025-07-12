@@ -53,8 +53,8 @@ A beautiful, feature-rich Sudoku game built with React Native and Expo. Experien
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/sudoku.git
-   cd sudoku
+   git clone https://github.com/kerem-kirici/SudokuMobileApp.git
+   cd SudokuMobileApp
    ```
 
 2. **Install dependencies**
@@ -160,6 +160,11 @@ The app uses a comprehensive color scheme with semantic naming:
 - **Cleanup**: Proper cleanup of event listeners and timers
 - **State Optimization**: Efficient state structure and updates
 
+### Asset Optimization
+- **Optimized Screenshots**: README images compressed to ~50KB each (94% size reduction)
+- **Fast Loading**: Optimized for quick repository browsing
+- **GitHub Friendly**: Small file sizes for better performance
+
 ## 📊 Features in Detail
 
 ### Game Modes
@@ -181,6 +186,20 @@ The app uses a comprehensive color scheme with semantic naming:
 - **Smooth Animations**: Fluid transitions between states
 - **Intuitive Controls**: Easy-to-use number input system
 - **Progress Persistence**: Automatic save and restore
+
+## 🎯 Recent Updates
+
+### Performance Improvements
+- **Action Queue System**: Prevents rapid input conflicts and missed interactions
+- **Optimized Screenshots**: Reduced README image sizes by 94% for faster loading
+- **Centralized Color Scheme**: Unified theming system for consistent design
+- **Enhanced Modals**: Improved completion and game over modals
+
+### Code Quality
+- **TypeScript Integration**: Full type safety across the application
+- **Component Refactoring**: Separated action handlers into useCallback functions
+- **Error Handling**: Robust error handling and user feedback
+- **Code Organization**: Clean, maintainable code structure
 
 ## 🤝 Contributing
 
