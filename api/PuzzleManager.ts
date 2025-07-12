@@ -50,11 +50,8 @@ export async function EnsurePuzzleCache() {
     if (totalPuzzlesNeeded > 0) {
       console.log(`Fetching ${totalPuzzlesNeeded} new puzzles across all difficulties...`);
       
-      let puzzlesFound = 0;
-
-      
       // Fetch new puzzles
-      while (puzzlesFound < totalPuzzlesNeeded) {
+      while (totalPuzzlesNeeded > 0) {
         try {
           const puzzleData = await generateSudoku();
           const difficulty = puzzleData.difficulty.toLowerCase() as keyof PuzzleCache;
@@ -62,7 +59,6 @@ export async function EnsurePuzzleCache() {
           // Check if we need more puzzles of this difficulty
           if (existingPuzzleCache[difficulty].length < MIN_PUZZLES_PER_DIFFICULTY) {
             existingPuzzleCache[difficulty].push(puzzleData);
-            puzzlesFound++;
             
             // Store updated puzzle cache after each successful addition
             await AsyncStorage.setItem(ALL_PUZZLES_STORAGE_KEY, JSON.stringify(existingPuzzleCache));
@@ -72,6 +68,31 @@ export async function EnsurePuzzleCache() {
         } catch (error) {
           console.error(`Failed to fetch puzzle: `, error);
         }
+        
+        // Recalculate totalPuzzlesNeeded from current storage state
+        const currentStoredPuzzlesJson = await AsyncStorage.getItem(ALL_PUZZLES_STORAGE_KEY);
+        if (currentStoredPuzzlesJson) {
+          const currentPuzzleCache = JSON.parse(currentStoredPuzzlesJson);
+          // Ensure all difficulty arrays exist
+          const updatedPuzzleCache = {
+            hard: currentPuzzleCache.hard || [],
+            medium: currentPuzzleCache.medium || [],
+            easy: currentPuzzleCache.easy || [],
+          };
+          
+          // Update local cache reference to match storage
+          existingPuzzleCache = updatedPuzzleCache;
+          
+          // Recalculate total puzzles needed
+          totalPuzzlesNeeded = 0;
+          difficulties.forEach(difficulty => {
+            const currentCount = existingPuzzleCache[difficulty].length;
+            if (currentCount < MIN_PUZZLES_PER_DIFFICULTY) {
+              totalPuzzlesNeeded += MIN_PUZZLES_PER_DIFFICULTY - currentCount;
+            }
+          });
+        }
+        
         // Add small delay between requests to be respectful to the API
         await new Promise(resolve => setTimeout(resolve, 100));
       }

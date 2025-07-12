@@ -116,6 +116,18 @@ export default function WelcomeScreen() {
     let puzzle = await GetRandomPuzzle(difficulty);
     
     if (!puzzle) {
+      // Show alert that no puzzle was found for the selected difficulty
+      Alert.alert(
+        'No Cached Puzzle',
+        `There was no ${difficulty} puzzle in the storage, fetching a random puzzle.`,
+        [
+          {
+            text: 'OK',
+            style: 'default',
+          },
+        ]
+      );
+      
       // Check network connectivity before trying to generate a new puzzle
       const isNetworkAvailable = await checkNetworkConnectivity();
       

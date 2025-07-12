@@ -7,16 +7,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Animated,
-  AppState,
-  BackHandler,
-  Dimensions,
-  StatusBar,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View
+    Animated,
+    AppState,
+    BackHandler,
+    Dimensions,
+    StatusBar,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import NumberPad from '../components/NumberPad';
 import SudokuGrid from '../components/SudokuGrid';
@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.text.primary,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Arial',
   },
   pauseButton: {
     paddingHorizontal: 10,
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
   controlButtonText: {
     color: Colors.text.primary,
     fontSize: scale(16),
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Arial',
     fontWeight: 'bold',
     marginLeft: scale(8),
   },
@@ -726,7 +726,7 @@ const styles = StyleSheet.create({
   notesLabel: {
     color: Colors.text.tertiary,
     fontSize: scale(16),
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Arial',
     marginRight: scale(12),
   },
   notesSwitch: {
@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
   timerText: {
     color: Colors.text.primary,
     fontSize: scale(18),
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Arial',
     fontWeight: 'bold',
     marginLeft: scale(6),
   },
@@ -756,13 +756,13 @@ const styles = StyleSheet.create({
     color: Colors.text.tertiary,
     fontSize: scale(18),
     fontWeight: 'bold',
-    fontFamily: 'SpaceMonoBold',
+    fontFamily: 'Arial',
     marginLeft: scale(6),
   },
   mistakesText: {
     color: Colors.icon.error,
     fontSize: scale(18),
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Arial',
     fontWeight: 'bold',
     marginLeft: scale(6),
   },
