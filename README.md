@@ -34,13 +34,13 @@ A beautiful, feature-rich Sudoku game built with React Native and Expo. Experien
 ## 📱 Screenshots
 
 ### Home Page Interface
-![Statistics](assets/images/simulator_screenshot_6CF29BE8-1BC0-4A95-8CE1-D5A8AD882202.png)
+![Sudoku App](assets/images/simulator_screenshot_6CF29BE8-1BC0-4A95-8CE1-D5A8AD882202.png)
 
 ### Main Game Interface
-![Sudoku App](assets/images/simulator_screenshot_C7023D23-8125-48C3-80AF-40099B9AA323.png)
+![Game Inderface](assets/images/simulator_screenshot_66406F0E-861D-4ECC-BEBE-A86838507C07.png)
 
 ### Statistics & Progress
-![Game Interface](assets/images/simulator_screenshot_66406F0E-861D-4ECC-BEBE-A86838507C07.png)
+![Statistics](assets/images/simulator_screenshot_C7023D23-8125-48C3-80AF-40099B9AA323.png)
 
 ## 🚀 Getting Started
 
@@ -163,9 +163,9 @@ The app uses a comprehensive color scheme with semantic naming:
 - **State Optimization**: Efficient state structure and updates
 
 ### Asset Optimization
-- **Optimized Screenshots**: README images compressed to ~130KB each (85% size reduction)
+- **High-Quality Screenshots**: README images optimized to ~200KB each with excellent quality
 - **Fast Loading**: Optimized for quick repository browsing
-- **GitHub Friendly**: Reasonable file sizes for better performance
+- **GitHub Friendly**: Balanced file sizes for optimal performance and quality
 
 ## 📊 Features in Detail
 
@@ -193,7 +193,7 @@ The app uses a comprehensive color scheme with semantic naming:
 
 ### Performance Improvements
 - **Action Queue System**: Prevents rapid input conflicts and missed interactions
-- **Optimized Screenshots**: Reduced README image sizes by 85% for faster loading
+- **High-Quality Screenshots**: Optimized README images with excellent quality and reasonable file sizes
 - **Centralized Color Scheme**: Unified theming system for consistent design
 - **Enhanced Modals**: Improved completion and game over modals
 
