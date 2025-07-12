@@ -42,11 +42,11 @@ export const PauseModal: React.FC<PauseModalProps> = ({
           <Text style={styles.modalTitle}>Game Paused</Text>
           <Text style={styles.modalTime}>Time: {formatTime(elapsedTime)}</Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.resumeButton}
-              onPress={onResume}
-              activeOpacity={0.7}
-            >
+          <TouchableOpacity
+            style={styles.resumeButton}
+            onPress={onResume}
+            activeOpacity={0.7}
+          >
               <Text style={styles.resumeButtonText}>Resume</Text>
             </TouchableOpacity>
           </View>
@@ -88,7 +88,7 @@ export const CompletionModal: React.FC<CompletionModalProps> = ({
               activeOpacity={0.7}
             >
               <Text style={styles.backButtonText}>Back to Menu</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
           </View>
         </View>
       </View>

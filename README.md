@@ -1,50 +1,223 @@
-# Welcome to your Expo app 👋
+# 🧩 Sudoku - React Native App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A beautiful, feature-rich Sudoku game built with React Native and Expo. Experience the classic puzzle game with modern design, smooth animations, and intelligent gameplay features.
 
-## Get started
+![Sudoku App](assets/images/simulator_screenshot_C7023D23-8125-48C3-80AF-40099B9AA323.png)
 
-1. Install dependencies
+## ✨ Features
 
+### 🎮 Gameplay
+- **Multiple Difficulty Levels**: Easy, Medium, Hard, and Expert puzzles
+- **Smart Number Input**: Tap numbers or use the number pad for quick input
+- **Note Taking**: Add pencil marks to track possible numbers
+- **Auto-Validation**: Real-time feedback on correct and incorrect moves
+- **Undo/Redo**: Full move history with undo and redo functionality
+- **Progress Tracking**: Save and resume games with elapsed time and mistake tracking
+
+### 🎨 Design & UX
+- **Dark Theme**: Beautiful dark UI with gradient backgrounds
+- **Smooth Animations**: Fluid transitions and haptic feedback
+- **Responsive Layout**: Optimized for all screen sizes
+- **Accessibility**: High contrast colors and intuitive navigation
+- **Modern UI**: Clean, minimalist design with attention to detail
+
+### 📊 Statistics & Analytics
+- **Game Statistics**: Track completion times, mistakes, and success rates
+- **Progress History**: View detailed game history and performance
+- **Achievement System**: Monitor your improvement over time
+
+### 🔧 Technical Features
+- **Offline Play**: No internet connection required
+- **Local Storage**: Automatic game saving and restoration
+- **Performance Optimized**: Smooth 60fps gameplay
+- **Cross-Platform**: Works on iOS, Android, and Web
+
+## 📱 Screenshots
+
+### Main Game Interface
+![Game Interface](assets/images/simulator_screenshot_66406F0E-861D-4ECC-BEBE-A86838507C07.png)
+
+### Statistics & Progress
+![Statistics](assets/images/simulator_screenshot_6CF29BE8-1BC0-4A95-8CE1-D5A8AD882202.png)
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- Expo CLI
+- iOS Simulator (for iOS development)
+- Android Studio (for Android development)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/sudoku.git
+   cd sudoku
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. **Start the development server**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+4. **Run on your preferred platform**
+   - **iOS**: Press `i` in the terminal or scan the QR code with Expo Go
+   - **Android**: Press `a` in the terminal or scan the QR code with Expo Go
+   - **Web**: Press `w` in the terminal
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🏗️ Project Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Sudoku/
+├── app/                    # Main app screens
+│   ├── _layout.tsx        # Root layout with navigation
+│   ├── index.tsx          # Home screen
+│   ├── game.tsx           # Main game screen
+│   └── statistics.tsx     # Statistics screen
+├── components/             # Reusable components
+│   ├── SudokuGrid.tsx     # Sudoku grid component
+│   ├── NumberPad.tsx      # Number input pad
+│   └── modals.tsx         # Modal components
+├── api/                   # API and data management
+│   ├── PuzzleManager.ts   # Puzzle generation and management
+│   ├── StatisticsManager.ts # Statistics tracking
+│   └── SudokuFetchAPI.tsx # API utilities
+├── types/                 # TypeScript type definitions
+│   ├── sudoku.ts          # Game data types
+│   └── theme.ts           # Color scheme and theming
+└── assets/                # Images, fonts, and static assets
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🎨 Design System
 
-## Learn more
+The app uses a comprehensive color scheme with semantic naming:
 
-To learn more about developing your project with Expo, look at the following resources:
+### Color Palette
+- **Primary**: `#e94560` (Pink/Red brand color)
+- **Background**: Dark blue gradient (`#1a1a2e` → `#16213e` → `#0f3460`)
+- **Surface**: Semi-transparent whites for cards and modals
+- **Text**: White with various opacity levels for hierarchy
+- **Status Colors**: Green (success), Red (error), Orange (warning), Blue (info)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Key Features
+- **Centralized Theming**: All colors defined in `types/theme.ts`
+- **Semantic Color Helpers**: Easy-to-use color access functions
+- **Consistent Design**: Unified visual language across all components
+- **Accessibility**: High contrast ratios for better readability
 
-## Join the community
+## 🧠 Game Logic
 
-Join our community of developers creating universal apps.
+### Puzzle Generation
+- **Algorithm**: Custom Sudoku puzzle generation with difficulty scaling
+- **Validation**: Real-time puzzle validation and solution checking
+- **Uniqueness**: Ensures each puzzle has exactly one solution
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Move System
+- **Action Queue**: Prevents rapid input conflicts with sequential processing
+- **History Tracking**: Complete move history with undo/redo capability
+- **State Management**: Efficient state updates with React hooks
+
+### Statistics Tracking
+- **Completion Time**: Tracks elapsed time for each puzzle
+- **Mistake Counting**: Records incorrect moves and attempts
+- **Performance Metrics**: Calculates success rates and improvement trends
+
+## 🛠️ Technologies Used
+
+### Core Framework
+- **React Native**: Cross-platform mobile development
+- **Expo**: Development platform and tooling
+- **TypeScript**: Type-safe JavaScript development
+
+### Key Libraries
+- **@react-navigation/bottom-tabs**: Tab navigation
+- **@react-native-async-storage/async-storage**: Local data persistence
+- **expo-haptics**: Haptic feedback for better UX
+- **expo-linear-gradient**: Beautiful gradient backgrounds
+- **react-native-reanimated**: Smooth animations
+
+### Development Tools
+- **ESLint**: Code linting and formatting
+- **TypeScript**: Static type checking
+- **Expo Router**: File-based routing system
+
+## 🚀 Performance Optimizations
+
+### Rendering
+- **Memoization**: React.memo and useCallback for component optimization
+- **Efficient Re-renders**: Minimal state updates and smart diffing
+- **Lazy Loading**: Components loaded only when needed
+
+### Memory Management
+- **Action Queue**: Prevents memory leaks from rapid interactions
+- **Cleanup**: Proper cleanup of event listeners and timers
+- **State Optimization**: Efficient state structure and updates
+
+## 📊 Features in Detail
+
+### Game Modes
+- **Classic Sudoku**: Traditional 9x9 grid puzzles
+- **Difficulty Levels**: 
+  - Easy: 40-50 empty cells
+  - Medium: 50-60 empty cells
+  - Hard: 60-70 empty cells
+  - Expert: 70+ empty cells
+
+### Smart Features
+- **Auto-Highlighting**: Highlights related cells (same row, column, box)
+- **Conflict Detection**: Shows conflicts in real-time
+- **Note System**: Pencil marks for tracking possibilities
+- **Auto-Complete**: Automatically fills obvious cells
+
+### User Experience
+- **Haptic Feedback**: Tactile response for interactions
+- **Smooth Animations**: Fluid transitions between states
+- **Intuitive Controls**: Easy-to-use number input system
+- **Progress Persistence**: Automatic save and restore
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to submit issues and pull requests.
+
+### Development Setup
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Style
+- Follow TypeScript best practices
+- Use the existing color scheme and design patterns
+- Add proper TypeScript types for new features
+- Include appropriate error handling
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Expo Team**: For the amazing development platform
+- **React Native Community**: For the excellent ecosystem
+- **Sudoku Enthusiasts**: For inspiration and feedback
+
+## 📞 Support
+
+If you encounter any issues or have questions:
+- Open an issue on GitHub
+- Check the [Expo documentation](https://docs.expo.dev/)
+- Join our community discussions
+
+---
+
+**Made with ❤️ using React Native and Expo**
+
+*Enjoy playing Sudoku! 🧩*
