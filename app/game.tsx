@@ -7,16 +7,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Animated,
-    AppState,
-    BackHandler,
-    Dimensions,
-    StatusBar,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  AppState,
+  BackHandler,
+  Dimensions,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import NumberPad from '../components/NumberPad';
 import SudokuGrid from '../components/SudokuGrid';
@@ -49,188 +49,11 @@ export default function GameScreen() {
   const timerRef = useRef<number | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  
   const [isPaused, setIsPaused] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isClueAllNotesGiven, setIsClueAllNotesGiven] = useState(false);
 
-  // Action queue system
-  const actionQueue = useRef<ActionType[]>([]);
-  const isProcessingQueue = useRef(false);
-
-  // Separate action handlers as useCallback functions
-  const handleCellPressAction = useCallback((row: number, col: number) => {
-    setSelectedCell([row, col]);
-  }, []);
-
-  const handleNumberPressAction = useCallback((number: number) => {
-    if (selectedCell && sudoku.initialPuzzle[selectedCell[0]][selectedCell[1]] === 0) {
-      // Add to move history
-      const newMoveHistory = [
-        ...currentMoveHistory,
-        {
-          previousPuzzle: sudoku.puzzle.map(row => [...row]),
-          previousSelectedCell: selectedCell
-        }
-      ];
-      
-      const [row, col] = selectedCell;
-      const currentPuzzle = [...sudoku.puzzle];
-      
-      if (isNotesMode) {
-        // Notes mode: add number to array or create new array
-        const currentCellValue = currentPuzzle[row][col];
-        if (Array.isArray(currentCellValue)) {
-          // If it's already an array, toggle the number (add if not present, remove if present)
-          if (currentCellValue.includes(number)) {
-            // Remove the number if it exists
-            currentPuzzle[row][col] = currentCellValue.filter((n: number) => n !== number);
-          } else {
-            // Add the number if it doesn't exist
-            currentPuzzle[row][col] = [...currentCellValue, number];
-          }
-        } else {
-          // If it's empty (0), create new array
-          currentPuzzle[row][col] = [number];
-        }
-      } else if (currentPuzzle[row][col] === number) {
-        // Normal mode: set the number directly
-        currentPuzzle[row][col] = 0;  
-        setNumberCounter(prev => ({ ...prev, [number]: prev[number] - 1 }));
-      } else {
-        // Normal mode: set the number directly
-        currentPuzzle[row][col] = number;
-        
-        // Check if the number is correct
-        if (number !== sudoku.solution[row][col]) {
-          setMistakes(prev => prev + 1);
-        } else {
-          setNumberCounter(prev => ({ ...prev, [number]: prev[number] + 1 }));
-        }
-        
-        // Clear notes for this number in all highlighted cells
-        clearNotesOnOverlap(currentPuzzle, row, col, number);
-      }
-      
-      setSudoku({ ...sudoku, puzzle: currentPuzzle, puzzleHistory: newMoveHistory });
-      setCurrentMoveHistory(newMoveHistory);
-    }
-  }, [selectedCell, sudoku, currentMoveHistory, isNotesMode]);
-
-  const handleUndoAction = useCallback(() => {
-    if (currentMoveHistory.length > 0) {
-      const { previousPuzzle, previousSelectedCell } = currentMoveHistory[currentMoveHistory.length - 1];
-      setSudoku({ ...sudoku, puzzle: previousPuzzle });
-      setSelectedCell(previousSelectedCell);
-      setCurrentMoveHistory(prev => prev.slice(0, -1));
-    }
-  }, [currentMoveHistory, sudoku]);
-
-  const handleToggleNotesAction = useCallback(() => {
-    setIsNotesMode(!isNotesMode);
-  }, [isNotesMode]);
-
-  const handleClueAction = useCallback(() => {
-    // Find all empty cells (cells that are 0 in initial puzzle and still empty in current puzzle)
-    const emptyCells: [number, number][] = [];
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        if (sudoku.initialPuzzle[row][col] === 0 && 
-            (sudoku.puzzle[row][col] === 0 || 
-              sudoku.puzzle[row][col] !== sudoku.solution[row][col] ||
-              Array.isArray(sudoku.puzzle[row][col])
-            )) {
-          emptyCells.push([row, col]);
-        }
-      }
-    }
-
-    if (emptyCells.length > 0) {
-      // Select a random empty cell
-      const randomIndex = Math.floor(Math.random() * emptyCells.length);
-      const [row, col] = emptyCells[randomIndex];
-      
-      // Get the correct number from solution
-      const correctNumber = sudoku.solution[row][col];
-      
-      // Add to move history
-      const newMoveHistory = [
-        ...currentMoveHistory,
-        {
-          previousPuzzle: sudoku.puzzle.map(row => [...row]),
-          previousSelectedCell: selectedCell || [0, 0]
-        }
-      ];
-      
-      // Update the puzzle with the correct number
-      const currentPuzzle = [...sudoku.puzzle];
-      currentPuzzle[row][col] = correctNumber;
-      
-      // Update number counter
-      setNumberCounter(prev => ({ ...prev, [correctNumber]: prev[correctNumber] + 1 }));
-      
-      // Clear notes for this number in all highlighted cells
-      clearNotesOnOverlap(currentPuzzle, row, col, correctNumber);
-      
-      // Update state
-      setSudoku({ ...sudoku, puzzle: currentPuzzle, puzzleHistory: newMoveHistory });
-      setCurrentMoveHistory(newMoveHistory);
-      setSelectedCell([row, col]);
-    }
-  }, [sudoku, currentMoveHistory, selectedCell]);
-
-  // Process action queue
-  const processActionQueue = useCallback(async () => {
-    if (isProcessingQueue.current || actionQueue.current.length === 0) {
-      return;
-    }
-
-    isProcessingQueue.current = true;
-
-    while (actionQueue.current.length > 0) {
-      const action = actionQueue.current.shift();
-      if (!action) continue;
-
-      try {
-        switch (action.type) {
-          case 'CELL_PRESS':
-            handleCellPressAction(action.payload.row, action.payload.col);
-            break;
-
-          case 'NUMBER_PRESS':
-            handleNumberPressAction(action.payload.number);
-            break;
-
-          case 'UNDO':
-            handleUndoAction();
-            break;
-
-          case 'TOGGLE_NOTES':
-            handleToggleNotesAction();
-            break;
-
-          case 'CLUE':
-            handleClueAction();
-            break;
-        }
-      } catch (error) {
-        console.error('Error processing action:', action, error);
-      }
-    }
-
-    isProcessingQueue.current = false;
-  }, [handleCellPressAction, handleNumberPressAction, handleUndoAction, handleToggleNotesAction, handleClueAction]);
-
-  // Add action to queue and trigger processing
-  const queueAction = useCallback((action: ActionType) => {
-    actionQueue.current.push(action);
-    
-    // Trigger processing on next frame to ensure UI updates
-    requestAnimationFrame(() => {
-      processActionQueue();
-    });
-  }, [processActionQueue]);
-
-  // Optimize number counter initialization
+  // --- Move numberCounter and initialNumberCounter here ---
   const initialNumberCounter = useMemo(() => {
     const flatPuzzle = initialSudokuObj.puzzle.flat();
     return {
@@ -245,23 +68,316 @@ export default function GameScreen() {
       [9]: flatPuzzle.filter(num => num === 9).length,
     };
   }, [initialSudokuObj.puzzle]);
-
   const [numberCounter, setNumberCounter] = useState<{ [key: number]: number }>(initialNumberCounter);
 
-  // Add app state tracking
-  const [appState, setAppState] = useState(AppState.currentState);
+  // Action queue system
+  const actionQueue = useRef<ActionType[]>([]);
+  const isProcessingQueue = useRef(false);
+
+  // Process action queue
+  const processActionQueue = useCallback(async () => {
+    if (isProcessingQueue.current || actionQueue.current.length === 0) {
+      return;
+    }
+
+    isProcessingQueue.current = true;
+
+    // --- TEMP VARIABLES ---
+    let tempSudoku = { ...sudoku, puzzle: sudoku.puzzle.map(row => [...row]) };
+    let tempSelectedCell: [number, number] | null = selectedCell ? [selectedCell[0], selectedCell[1]] : null;
+    let tempMoveHistory = [...currentMoveHistory];
+    let tempMistakes = mistakes;
+    let tempNumberCounter = { ...numberCounter };
+    let moveHistoryToAppend: MoveHistory[] = [];
+    let tempIsNotesMode = isNotesMode;
+    let tempIsClueAllNotesGiven = isClueAllNotesGiven;
+
+    // Helper for clearNotesOnOverlap (uses tempSudoku)
+    const tempClearNotesOnOverlap = (puzzle: Array<Array<number | Array<number>>>, row: number, col: number, number: number) => {
+      // Clear notes for this number in the same row
+      for (let c = 0; c < 9; c++) {
+        if (c !== col) {
+          const cellValue = puzzle[row][c];
+          if (Array.isArray(cellValue) && cellValue.includes(number)) {
+            puzzle[row][c] = cellValue.filter((n: number) => n !== number);
+          }
+        }
+      }
+      // Clear notes for this number in the same column
+      for (let r = 0; r < 9; r++) {
+        if (r !== row) {
+          const cellValue = puzzle[r][col];
+          if (Array.isArray(cellValue) && cellValue.includes(number)) {
+            puzzle[r][col] = cellValue.filter((n: number) => n !== number);
+          }
+        }
+      }
+      // Clear notes for this number in the same 3x3 block
+      const blockRow = Math.floor(row / 3) * 3;
+      const blockCol = Math.floor(col / 3) * 3;
+      for (let r = blockRow; r < blockRow + 3; r++) {
+        for (let c = blockCol; c < blockCol + 3; c++) {
+          if (r !== row || c !== col) {
+            const cellValue = puzzle[r][c];
+            if (Array.isArray(cellValue) && cellValue.includes(number)) {
+              puzzle[r][c] = cellValue.filter((n: number) => n !== number);
+            }
+          }
+        }
+      }
+    };
+
+    const tempGiveAllNotesClueOptimized = (puzzle: Array<Array<number | Array<number>>>) => {
+      // Precompute used numbers for each row, column, and block
+      const n = 9;
+      const usedInRow: Set<number>[] = Array.from({ length: n }, () => new Set<number>());
+      const usedInCol: Set<number>[] = Array.from({ length: n }, () => new Set<number>());
+      const usedInBlock: Set<number>[][] = Array.from({ length: 3 }, () =>
+        Array.from({ length: 3 }, () => new Set<number>())
+      );
+
+      for (let row = 0; row < n; row++) {
+        for (let col = 0; col < n; col++) {
+          const cellValue = puzzle[row][col];
+          if (typeof cellValue === 'number' && cellValue !== 0) {
+            usedInRow[row].add(cellValue);
+            usedInCol[col].add(cellValue);
+            usedInBlock[Math.floor(row / 3)][Math.floor(col / 3)].add(cellValue);
+          }
+        }
+      }
+
+      // Now fill possible notes for each empty cell
+      for (let row = 0; row < n; row++) {
+        for (let col = 0; col < n; col++) {
+          if (puzzle[row][col] === 0 || Array.isArray(puzzle[row][col])) {
+            const possible = [];
+            for (let num = 1; num <= 9; num++) {
+              if (
+                !usedInRow[row].has(num) &&
+                !usedInCol[col].has(num) &&
+                !usedInBlock[Math.floor(row / 3)][Math.floor(col / 3)].has(num)
+              ) {
+                possible.push(num);
+              }
+            }
+            puzzle[row][col] = possible;
+          }
+        }
+      }
+    };
+    // Add helper functions for each action type above processActionQueue
+    // --- Action Handlers for Queue ---
+    function handleCellPressActionQueue(row: number, col: number, tempSelectedCell: [number, number] | null) {
+      return [row, col] as [number, number];
+    }
+
+    function handleNumberPressActionQueue(
+      actionNumber: number,
+      tempSelectedCell: [number, number] | null,
+      tempSudoku: Sudoku,
+      tempIsNotesMode: boolean,
+      tempNumberCounter: { [key: number]: number },
+      tempMistakes: number,
+      moveHistoryToAppend: MoveHistory[]
+    ) {
+      if (
+        tempSelectedCell &&
+        tempSudoku.initialPuzzle[tempSelectedCell[0]][tempSelectedCell[1]] === 0
+      ) {
+        // Add to move history
+        const newMove: MoveHistory = {
+          previousPuzzle: tempSudoku.puzzle.map(row => [...row]),
+          previousSelectedCell: tempSelectedCell ? [tempSelectedCell[0], tempSelectedCell[1]] : [0, 0],
+        };
+        moveHistoryToAppend.push(newMove);
+
+        const [row, col] = tempSelectedCell;
+        const currentPuzzle = tempSudoku.puzzle;
+
+        if (tempIsNotesMode) {
+          // Notes mode: add number to array or create new array
+          const currentCellValue = currentPuzzle[row][col];
+          if (Array.isArray(currentCellValue)) {
+            if (currentCellValue.includes(actionNumber)) {
+              currentPuzzle[row][col] = currentCellValue.filter((n: number) => n !== actionNumber);
+            } else {
+              currentPuzzle[row][col] = [...currentCellValue, actionNumber];
+            }
+          } else {
+            currentPuzzle[row][col] = [actionNumber];
+          }
+        } else if (currentPuzzle[row][col] === actionNumber) {
+          currentPuzzle[row][col] = 0;
+          tempNumberCounter[actionNumber] = (tempNumberCounter[actionNumber] || 0) - 1;
+        } else {
+          currentPuzzle[row][col] = actionNumber;
+          if (actionNumber !== tempSudoku.solution[row][col]) {
+            tempMistakes += 1;
+          } else {
+            tempNumberCounter[actionNumber] = (tempNumberCounter[actionNumber] || 0) + 1;
+          }
+          tempClearNotesOnOverlap(currentPuzzle, row, col, actionNumber);
+        }
+      }
+      return { tempNumberCounter, tempMistakes };
+    }
+
+    function handleUndoActionQueue(
+      tempMoveHistory: MoveHistory[],
+      moveHistoryToAppend: MoveHistory[],
+      tempSudoku: Sudoku
+    ) {
+      let tempSelectedCell: [number, number] | null = null;
+      if (tempMoveHistory.length > 0 || moveHistoryToAppend.length > 0) {
+        // Combine all move history for undo
+        const allHistory = [...tempMoveHistory, ...moveHistoryToAppend];
+        const lastMove = allHistory[allHistory.length - 1];
+        if (lastMove) {
+          tempSudoku.puzzle = lastMove.previousPuzzle.map(row => [...row]);
+          tempSelectedCell = lastMove.previousSelectedCell ? [lastMove.previousSelectedCell[0], lastMove.previousSelectedCell[1]] : null;
+          // Remove last move from move history
+          if (moveHistoryToAppend.length > 0) {
+            moveHistoryToAppend.pop();
+          } else {
+            tempMoveHistory.pop();
+          }
+        }
+      }
+      return tempSelectedCell;
+    }
+
+    function handleToggleNotesActionQueue(tempIsNotesMode: boolean) {
+      return !tempIsNotesMode;
+    }
+
+    function handleClueActionQueue(
+      tempSudoku: Sudoku,
+      tempSelectedCell: [number, number] | null,
+      moveHistoryToAppend: MoveHistory[],
+      tempNumberCounter: { [key: number]: number },
+      tempIsClueAllNotesGiven: boolean
+    ) {
+      // If all notes are clued, do nothing
+      if (tempIsClueAllNotesGiven) {
+        // Find all empty cells (cells that are 0 in initial puzzle and still empty in current puzzle)
+        const emptyCells: [number, number][] = [];
+        for (let row = 0; row < 9; row++) {
+          for (let col = 0; col < 9; col++) {
+            if (
+              tempSudoku.initialPuzzle[row][col] === 0 &&
+              (tempSudoku.puzzle[row][col] === 0 ||
+                tempSudoku.puzzle[row][col] !== tempSudoku.solution[row][col] ||
+                Array.isArray(tempSudoku.puzzle[row][col]))
+            ) {
+              emptyCells.push([row, col]);
+            }
+          }
+        }
+        let newSelectedCell = tempSelectedCell;
+        if (emptyCells.length > 0) {
+          const randomIndex = Math.floor(Math.random() * emptyCells.length);
+          const [row, col] = emptyCells[randomIndex];
+          const correctNumber = tempSudoku.solution[row][col];
+          const newMove: MoveHistory = {
+            previousPuzzle: tempSudoku.puzzle.map(row => [...row]),
+            previousSelectedCell: tempSelectedCell ? [tempSelectedCell[0], tempSelectedCell[1]] : [0, 0],
+          };
+          moveHistoryToAppend.push(newMove);
+          tempSudoku.puzzle[row][col] = correctNumber;
+          tempNumberCounter[correctNumber] = (tempNumberCounter[correctNumber] || 0) + 1;
+          tempClearNotesOnOverlap(tempSudoku.puzzle, row, col, correctNumber);
+          newSelectedCell = [row, col];
+        }
+        return {newSelectedCell, newIsClueAllNotesGiven: tempIsClueAllNotesGiven};
+      } else {
+        tempGiveAllNotesClueOptimized(tempSudoku.puzzle);
+        return {newSelectedCell: null, newIsClueAllNotesGiven: true};
+      }
+    }
+
+    while (actionQueue.current.length > 0) {
+      const action = actionQueue.current.shift();
+      if (!action) continue;
+
+      try {
+        switch (action.type) {
+          case 'CELL_PRESS': {
+            tempSelectedCell = handleCellPressActionQueue(action.payload.row, action.payload.col, tempSelectedCell);
+            break;
+          }
+          case 'NUMBER_PRESS': {
+            const result = handleNumberPressActionQueue(
+              action.payload.number,
+              tempSelectedCell,
+              tempSudoku,
+              tempIsNotesMode,
+              tempNumberCounter,
+              tempMistakes,
+              moveHistoryToAppend
+            );
+            tempNumberCounter = result.tempNumberCounter;
+            tempMistakes = result.tempMistakes;
+            break;
+          }
+          case 'UNDO': {
+            const newSelectedCell = handleUndoActionQueue(
+              tempMoveHistory,
+              moveHistoryToAppend,
+              tempSudoku
+            );
+            tempSelectedCell = newSelectedCell !== null ? newSelectedCell : tempSelectedCell;
+            break;
+          }
+          case 'TOGGLE_NOTES': {
+            tempIsNotesMode = handleToggleNotesActionQueue(tempIsNotesMode);
+            break;
+          }
+          case 'CLUE': {
+            const {newSelectedCell, newIsClueAllNotesGiven} = handleClueActionQueue(
+              tempSudoku,
+              tempSelectedCell,
+              moveHistoryToAppend,
+              tempNumberCounter,
+              tempIsClueAllNotesGiven
+            );
+            tempSelectedCell = newSelectedCell ? newSelectedCell : tempSelectedCell;
+            tempIsClueAllNotesGiven = newIsClueAllNotesGiven;
+            break;
+          }
+        }
+      } catch (error) {
+        console.error('Error processing action:', action, error);
+      }
+    }
+
+    // --- BATCH STATE UPDATES ---
+    setSudoku(tempSudoku);
+    setSelectedCell(tempSelectedCell as [number, number] | null);
+    setCurrentMoveHistory([...tempMoveHistory, ...moveHistoryToAppend]);
+    setMistakes(tempMistakes);
+    setNumberCounter(tempNumberCounter);
+    setIsNotesMode(tempIsNotesMode);
+    setIsClueAllNotesGiven(tempIsClueAllNotesGiven);
+
+    isProcessingQueue.current = false;
+  }, [sudoku, selectedCell, currentMoveHistory, mistakes, numberCounter, isNotesMode, isClueAllNotesGiven]);
+
+  // Add action to queue and trigger processing
+  const queueAction = useCallback((action: ActionType) => {
+    actionQueue.current.push(action);
+    
+    // Trigger processing on next frame to ensure UI updates
+    requestAnimationFrame(() => {
+      processActionQueue();
+    });
+  }, [processActionQueue]);
 
   const sudokuRef = useRef(sudoku);
   const isCompleteRef = useRef(isComplete);
   const isGameOverRef = useRef(isGameOver);
   const elapsedTimeRef = useRef(elapsedTime);
   const mistakesRef = useRef(mistakes);
-
-  useEffect(() => { sudokuRef.current = sudoku; }, [sudoku]);
-  useEffect(() => { isCompleteRef.current = isComplete; }, [isComplete]);
-  useEffect(() => { isGameOverRef.current = isGameOver; }, [isGameOver]);
-  useEffect(() => { elapsedTimeRef.current = elapsedTime; }, [elapsedTime]);
-  useEffect(() => { mistakesRef.current = mistakes; }, [mistakes]);
 
   // Save puzzle when component unmounts or user navigates away
   const savePuzzleOnExit = useCallback(async () => {
@@ -276,141 +392,10 @@ export default function GameScreen() {
     }
   }, []);
 
-  // Handle back button press
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      savePuzzleOnExit();
-      return false; // Let the default back behavior continue
-    });
-
-    // Cleanup function runs when component unmounts
-    return () => {
-      savePuzzleOnExit();
-      backHandler.remove();
-    };
-  }, [savePuzzleOnExit]);
-
-  // Timer effect
-  useEffect(() => {
-    if (isTimerRunning && !isComplete && !isPaused && !isGameOver) {
-      const updateTimer = () => {
-        setElapsedTime(prev => prev + 1);
-      };
-      timerRef.current = setInterval(updateTimer, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      setIsTimerRunning(false);
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isTimerRunning, isComplete, isPaused, isGameOver]);
-
-  // Add app state change listener
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState: string) => {
-      if (nextAppState.match(/inactive|background/)) {
-        // App is going to background - auto pause
-        setIsPaused(true);
-      }
-      setAppState(nextAppState as "active" | "background" | "inactive" | "unknown" | "extension");
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-
-    return () => {
-      subscription?.remove();
-    };
-  }, []);
-
-  // Check for puzzle completion
-  useEffect(() => {
-    if (!isComplete && isPuzzleComplete(sudoku.puzzle)) {
-      setIsComplete(true);
-      // Record completed game statistics
-      StatisticsManager.recordCompletedGame(elapsedTime, sudoku.difficulty as Difficulty);
-    }
-  }, [sudoku.puzzle, isComplete, elapsedTime]);
-
-  // Check for game over (3 mistakes)
-  useEffect(() => {
-    if (mistakes >= 3 && !isGameOver) {
-      setIsGameOver(true);
-      
-      // Record lost game statistics
-      StatisticsManager.recordLostGame(elapsedTime, sudoku.difficulty as Difficulty);
-    }
-  }, [mistakes, isGameOver, elapsedTime]);
-
-  // Add useEffect for pause/resume animations
-  useEffect(() => {
-    if (!isPaused && !isGameOver) {
-      // Reset and restart animations when resuming
-      fadeAnim.setValue(0);
-      slideAnim.setValue(30);
-      
-      setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }, 50);
-    }
-  }, [isPaused, isGameOver]); // Run when pause state changes
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const clearNotesOnOverlap = (puzzle: Array<Array<number | Array<number>>>, row: number, col: number, number: number) => {
-    // Clear notes for this number in the same row
-    for (let c = 0; c < 9; c++) {
-      if (c !== col) {
-        const cellValue = puzzle[row][c];
-        if (Array.isArray(cellValue) && cellValue.includes(number)) {
-          puzzle[row][c] = cellValue.filter((n: number) => n !== number);
-        }
-      }
-    }
-    
-    // Clear notes for this number in the same column
-    for (let r = 0; r < 9; r++) {
-      if (r !== row) {
-        const cellValue = puzzle[r][col];
-        if (Array.isArray(cellValue) && cellValue.includes(number)) {
-          puzzle[r][col] = cellValue.filter((n: number) => n !== number);
-        }
-      }
-    }
-    
-    // Clear notes for this number in the same 3x3 block
-    const blockRow = Math.floor(row / 3) * 3;
-    const blockCol = Math.floor(col / 3) * 3;
-    for (let r = blockRow; r < blockRow + 3; r++) {
-      for (let c = blockCol; c < blockCol + 3; c++) {
-        if (r !== row || c !== col) {
-          const cellValue = puzzle[r][c];
-          if (Array.isArray(cellValue) && cellValue.includes(number)) {
-            puzzle[r][c] = cellValue.filter((n: number) => n !== number);
-          }
-        }
-      }
-    }
   };
 
   // Updated handler functions that use the action queue
@@ -479,13 +464,116 @@ export default function GameScreen() {
     setSelectedCell(null);
   }, []);
 
-  const handlePauseResume = useCallback(() => {
-    setIsPaused(!isPaused);
-  }, [isPaused]);
+  const handlePauseGame = useCallback(() => {
+    setIsPaused(true);
+    setIsTimerRunning(false);
+  }, []);
 
   const handleResumeGame = useCallback(() => {
     setIsPaused(false);
+    setIsTimerRunning(true);
   }, []);
+
+  useEffect(() => { sudokuRef.current = sudoku; }, [sudoku]);
+  useEffect(() => { isCompleteRef.current = isComplete; }, [isComplete]);
+  useEffect(() => { isGameOverRef.current = isGameOver; }, [isGameOver]);
+  useEffect(() => { elapsedTimeRef.current = elapsedTime; }, [elapsedTime]);
+  useEffect(() => { mistakesRef.current = mistakes; }, [mistakes]);
+
+  // Handle back button press
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      savePuzzleOnExit();
+      return false; // Let the default back behavior continue
+    });
+
+    // Cleanup function runs when component unmounts
+    return () => {
+      savePuzzleOnExit();
+      backHandler.remove();
+    };
+  }, [savePuzzleOnExit]);
+
+  // Timer effect
+  useEffect(() => {
+    if (isTimerRunning && !isComplete && !isPaused && !isGameOver) {
+      const updateTimer = () => {
+        setElapsedTime(prev => prev + 1);
+      };
+      timerRef.current = setInterval(updateTimer, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      setIsTimerRunning(false);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isTimerRunning, isComplete, isPaused, isGameOver]);
+
+  // Add app state change listener
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState.match(/inactive|background/)) {
+        // App is going to background - auto pause
+        setIsPaused(true);
+        setIsTimerRunning(false);
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+
+  // Check for puzzle completion
+  useEffect(() => {
+    if (!isComplete && isPuzzleComplete(sudoku.puzzle)) {
+      setIsComplete(true);
+      // Record completed game statistics
+      StatisticsManager.recordCompletedGame(elapsedTime, sudoku.difficulty as Difficulty);
+    }
+  }, [sudoku.puzzle, isComplete, elapsedTime]);
+
+  // Check for game over (3 mistakes)
+  useEffect(() => {
+    if (mistakes >= 3 && !isGameOver) {
+      setIsGameOver(true);
+      
+      // Record lost game statistics
+      StatisticsManager.recordLostGame(elapsedTime, sudoku.difficulty as Difficulty);
+    }
+  }, [mistakes, isGameOver, elapsedTime]);
+
+  // Add useEffect for pause/resume animations
+  useEffect(() => {
+    if (!isPaused && !isGameOver) {
+      // Reset and restart animations when resuming
+      fadeAnim.setValue(0);
+      slideAnim.setValue(30);
+      
+      setTimeout(() => {
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, 50);
+    }
+  }, [isPaused, isGameOver]); // Run when pause state changes
 
   return (
     <View style={styles.container}>
@@ -517,7 +605,7 @@ export default function GameScreen() {
             <Text style={styles.headerTitle}>Sudoku Game</Text>
             <TouchableOpacity
               style={styles.pauseButton}
-              onPress={handlePauseResume}
+              onPress={handlePauseGame}
               activeOpacity={0.7}
             >
               <Ionicons 
@@ -597,8 +685,8 @@ export default function GameScreen() {
           </TouchableOpacity>
 
           {/* Number Pad */}
-          <View style={styles.bottomSection}>
-            <NumberPad onNumberPress={handleNumberPress} numberCounter={numberCounter} />
+          <View style={styles.numberPadContainer}>
+            <NumberPad onNumberPress={handleNumberPress} numberCounter={numberCounter} isNotesMode={isNotesMode} />
           </View>
 
           {/* Pause Modal */}
@@ -659,7 +747,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: scale(60),
+    marginBottom: windowHeight * 0.05,
   },
   backButton: {
     paddingHorizontal: 10,
@@ -680,11 +768,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   }, 
-  bottomSection: {
+  numberPadContainer: {
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'flex-start',
     minHeight: scale(60),
+    marginBottom: windowHeight * 0.08, 
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end',
   },
   touchableBackground: {
     flex: 1,
@@ -695,8 +785,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    minHeight: scale(40),
-    marginBottom: scale(80),
   },
   controlButton: {
     flexDirection: 'row',
@@ -743,7 +831,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: Colors.border.primary,
-    marginTop: windowHeight * 0.05,
   },
   timerText: {
     color: Colors.text.primary,

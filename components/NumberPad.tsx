@@ -11,9 +11,10 @@ import {
 interface NumberPadProps {
   onNumberPress: (number: number) => void;
   numberCounter: { [key: number]: number };
+  isNotesMode: boolean;
 }
 
-export default function NumberPad({ onNumberPress, numberCounter }: NumberPadProps) {
+export default function NumberPad({ onNumberPress, numberCounter, isNotesMode }: NumberPadProps) {
   const width = Dimensions.get('window').width;
   // Make buttons even bigger and square
   const buttonSize = (width - 5 * 8) / 9; // reduce spacing even more for bigger buttons
@@ -38,7 +39,7 @@ export default function NumberPad({ onNumberPress, numberCounter }: NumberPadPro
           activeOpacity={0.7}
         >
           <Text style={[
-            styles.numberButtonText,
+            isNotesMode ? styles.numberBottonNotesText : styles.numberButtonText,
             numberCounter && numberCounter[number] === 9 && styles.disabledButtonText,
           ]}>{number}</Text>
         </TouchableOpacity>
@@ -53,8 +54,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: Dimensions.get('window').height * 0.1, // increase margin bottom
-    marginTop: Dimensions.get('window').height * 0.02, // increase margin bottom
+    minHeight: Dimensions.get('window').height * 0.1, // increase margin bottom
   },
   numberButton: {
     margin: 2,
@@ -66,6 +66,12 @@ const styles = StyleSheet.create({
   },
   numberButtonText: {
     color: Colors.text.primary,
+    fontSize: 22,
+    fontFamily: 'Arial',
+    fontWeight: 'bold',
+  },
+  numberBottonNotesText: {
+    color: Colors.text.notesButtons,
     fontSize: 22,
     fontFamily: 'Arial',
     fontWeight: 'bold',

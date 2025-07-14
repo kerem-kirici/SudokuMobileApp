@@ -3,6 +3,7 @@ import { Difficulty, StatisticsManager } from '@/api/StatisticsManager';
 import generateSudoku from '@/api/SudokuFetchAPI';
 import DifficultySelector from '@/components/DifficultySelector';
 import { Sudoku } from '@/types/sudoku';
+import { Colors } from '@/types/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -147,7 +148,7 @@ export default function WelcomeScreen() {
       
       // If network is available, try to generate a new puzzle
       try {
-        puzzle = await generateSudoku();
+      puzzle = await generateSudoku();
         // Ensure the puzzle cache is maintained
         EnsurePuzzleCache();
       } catch (error) {
@@ -189,83 +190,83 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.background.primary} />
       <LinearGradient
-        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        colors={[Colors.background.primary, Colors.background.secondary, Colors.background.tertiary]}
         style={styles.gradient}
       >
         <View style={styles.pageWrapper}>
-          <Animated.View
-            style={[
-              styles.content,
-              {
-                opacity: fadeAnim,
-                transform: [
-                  { translateY: slideAnim },
-                  { scale: scaleAnim },
-                ],
-              },
-            ]}
-          >
-            {/* Logo/Icon */}
-            <View style={styles.logoContainer}>
-              <View style={styles.sudokuGrid}>
-                {Array.from({ length: 9 }, (_, i) => (
-                  <View key={i} style={styles.gridCell}>
-                    <Text style={styles.gridNumber}>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9][i]}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [
+                { translateY: slideAnim },
+                { scale: scaleAnim },
+              ],
+            },
+          ]}
+        >
+          {/* Logo/Icon */}
+          <View style={styles.logoContainer}>
+            <View style={styles.sudokuGrid}>
+              {Array.from({ length: 9 }, (_, i) => (
+                <View key={i} style={styles.gridCell}>
+                  <Text style={styles.gridNumber}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9][i]}
+                  </Text>
+                </View>
+              ))}
             </View>
+          </View>
 
-            {/* Title */}
-            <Text style={styles.title}>SUDOKU</Text>
+          {/* Title */}
+          <Text style={styles.title}>SUDOKU</Text>
             <Text style={styles.subtitle}>Welcome back Kerem!
-            </Text>
+          </Text>
 
-            {/* Description */}
-            <Text style={styles.description}>
-              
-            </Text>
+          {/* Description */}
+          <Text style={styles.description}>
+            
+          </Text>
 
-            {/* Buttons */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleStartGame}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="play" size={24} color="#fff" />
-                <Text style={styles.primaryButtonText}>Start Game</Text>
-              </TouchableOpacity>
+          {/* Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={handleStartGame}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="play" size={24} color={Colors.text.primary} />
+              <Text style={styles.primaryButtonText}>Start Game</Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.secondaryButton,
-                  !previousPuzzleExists && styles.disabledButton
-                ]}
-                onPress={handleRestart}
-                activeOpacity={0.8}
-                disabled={!previousPuzzleExists}
-              >
-                <Ionicons name="refresh" size={20} color="#fff" />
-                <Text style={[
-                  styles.secondaryButtonText,
-                  !previousPuzzleExists && styles.disabledButtonText
-                ]}>Restart</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.secondaryButton,
+                !previousPuzzleExists && styles.disabledButton
+              ]}
+              onPress={handleRestart}
+              activeOpacity={0.8}
+              disabled={!previousPuzzleExists}
+            >
+              <Ionicons name="refresh" size={20} color={Colors.text.primary} />
+              <Text style={[
+                styles.secondaryButtonText,
+                !previousPuzzleExists && styles.disabledButtonText
+              ]}>Restart</Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.statsButton}
-                onPress={() => router.push('/statistics')}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="stats-chart" size={20} color="#fff" />
-                <Text style={styles.statsButtonText}>Statistics</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.statsButton}
+              onPress={() => router.push('/statistics')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="stats-chart" size={20} color={Colors.text.primary} />
+              <Text style={styles.statsButtonText}>Statistics</Text>
+            </TouchableOpacity>
+          </View>
           </Animated.View>
           <View style={styles.footer}>
             <Text style={styles.footerText}>Made by Kerem Kırıcı</Text>
@@ -310,11 +311,11 @@ const styles = StyleSheet.create({
     height: 120,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     borderRadius: 12,
     padding: 2,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.border.primary,
   },
   gridCell: {
     width: '33.33%',
@@ -322,10 +323,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: Colors.border.secondary,
   },
   gridNumber: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'Arial',
     fontWeight: 'bold',
@@ -333,14 +334,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
     marginBottom: 10,
     fontFamily: 'Arial',
     letterSpacing: 4,
   },
   subtitle: {
     fontSize: 18,
-    color: '#e94560',
+    color: Colors.primary.main,
     marginBottom: Dimensions.get('window').height * 0.02,
     fontFamily: 'Arial',
     letterSpacing: 1,
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   primaryButton: {
-    backgroundColor: '#e94560',
+    backgroundColor: Colors.primary.main,
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 12,
@@ -367,7 +368,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    shadowColor: '#e94560',
+    shadowColor: Colors.primary.main,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -377,13 +378,13 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   primaryButtonText: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'Arial',
   },
   secondaryButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 12,
@@ -392,15 +393,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.border.primary,
   },
   secondaryButtonText: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'Arial',
   },
   statsButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 12,
@@ -409,10 +410,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.border.primary,
   },
   statsButtonText: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontSize: 16,
     fontFamily: 'Arial',
   },

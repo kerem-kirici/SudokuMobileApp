@@ -1,12 +1,13 @@
+import { Colors } from '@/types/theme';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useRef } from 'react';
 import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -57,13 +58,13 @@ export default function DifficultySelector({
   const getDifficultyColor = (difficulty: Difficulty) => {
     switch (difficulty) {
       case 'Easy':
-        return '#4CAF50';
+        return Colors.status.success;
       case 'Medium':
-        return '#FF9800';
+        return Colors.status.warning;
       case 'Hard':
-        return '#F44336';
+        return Colors.status.error;
       default:
-        return '#666';
+        return Colors.text.tertiary;
     }
   };
 
@@ -136,7 +137,7 @@ export default function DifficultySelector({
                 <Ionicons 
                   name="chevron-forward" 
                   size={Math.min(20, SCREEN_HEIGHT * 0.025)} 
-                  color="rgba(255, 255, 255, 0.6)" 
+                  color={Colors.text.muted} 
                 />
               </View>
             </TouchableOpacity>
@@ -160,14 +161,14 @@ export default function DifficultySelector({
 
 const styles = StyleSheet.create({
   bottomSheetBackground: {
-    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+    backgroundColor: Colors.surface.modal,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: Colors.border.primary,
   },
   handleIndicator: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: Colors.border.secondary,
     width: Math.min(40, SCREEN_WIDTH * 0.1),
     height: Math.min(4, SCREEN_HEIGHT * 0.005),
   },
@@ -183,13 +184,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Math.min(24, SCREEN_HEIGHT * 0.03),
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
     textAlign: 'center',
     marginBottom: Math.min(8, SCREEN_HEIGHT * 0.01),
   },
   subtitle: {
     fontSize: Math.min(16, SCREEN_HEIGHT * 0.02),
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.text.secondary,
     textAlign: 'center',
   },
   optionsContainer: {
@@ -200,8 +201,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: Math.min(12, SCREEN_HEIGHT * 0.015),
     padding: Math.min(16, SCREEN_HEIGHT * 0.02),
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.surface.primary,
+    borderColor: Colors.border.primary,
   },
   difficultyContent: {
     flexDirection: 'row',
@@ -214,27 +215,27 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: Math.min(18, SCREEN_HEIGHT * 0.022),
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
     marginBottom: Math.min(2, SCREEN_HEIGHT * 0.002),
   },
   difficultyDescription: {
     fontSize: Math.min(14, SCREEN_HEIGHT * 0.017),
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.text.secondary,
   },
   cancelButtonContainer: {
     paddingBottom: Math.min(10, SCREEN_HEIGHT * 0.012),
   },
   cancelButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     paddingVertical: Math.min(14, SCREEN_HEIGHT * 0.017),
     borderRadius: Math.min(12, SCREEN_HEIGHT * 0.015),
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.border.primary,
   },
   cancelButtonText: {
     fontSize: Math.min(16, SCREEN_HEIGHT * 0.02),
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.text.muted,
   },
 }); 

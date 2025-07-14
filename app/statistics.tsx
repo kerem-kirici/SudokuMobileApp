@@ -1,4 +1,5 @@
 import { Difficulty, GameRecord, GameStats, StatisticsManager } from '@/api/StatisticsManager';
+import { Colors } from '@/types/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -159,13 +160,13 @@ export default function StatisticsScreen() {
   const getTabColor = (tab: TabType) => {
     switch (tab) {
       case 'Easy':
-        return '#4CAF50';
+        return Colors.status.success;
       case 'Medium':
-        return '#FF9800';
+        return Colors.status.warning;
       case 'Hard':
-        return '#F44336';
+        return Colors.status.error;
       default:
-        return '#e94560';
+        return Colors.primary.main;
     }
   };
 
@@ -173,7 +174,7 @@ export default function StatisticsScreen() {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#1a1a2e', '#16213e', '#0f3460']}
+          colors={[Colors.background.primary, Colors.background.secondary, Colors.background.tertiary]}
           style={styles.gradient}
         >
           <View style={styles.loadingContainer}>
@@ -186,7 +187,7 @@ export default function StatisticsScreen() {
 
   return (
     <LinearGradient
-      colors={['#1a1a2e', '#16213e', '#0f3460']}
+      colors={[Colors.background.primary, Colors.background.secondary, Colors.background.tertiary]}
       style={styles.gradient}
     >
       <Animated.View
@@ -205,7 +206,7 @@ export default function StatisticsScreen() {
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Statistics</Text>
           <TouchableOpacity
@@ -213,7 +214,7 @@ export default function StatisticsScreen() {
             onPress={handleClearStats}
             activeOpacity={0.7}
           >
-            <Ionicons name="trash-outline" size={24} color="#ff6b6b" />
+            <Ionicons name="trash-outline" size={24} color={Colors.primary.light} />
           </TouchableOpacity>
         </View>
 
@@ -316,7 +317,7 @@ export default function StatisticsScreen() {
             </Text>
             {recentGames.length === 0 ? (
               <View style={styles.emptyState}>
-                <Ionicons name="stats-chart-outline" size={48} color="rgba(255, 255, 255, 0.3)" />
+                <Ionicons name="stats-chart-outline" size={48} color={Colors.text.secondary} />
                 <Text style={styles.emptyText}>
                   {currentTab === 'Overall' ? 'No games played yet' : `No ${currentTab.toLowerCase()} games played yet`}
                 </Text>
@@ -349,7 +350,7 @@ export default function StatisticsScreen() {
                         <Ionicons 
                           name={game.completed ? "checkmark-circle" : "close-circle"} 
                           size={16} 
-                          color={game.completed ? "#4CAF50" : "#f44336"} 
+                          color={game.completed ? Colors.status.success : Colors.status.error} 
                         />
                         <Text style={[
                           styles.completionText,
@@ -391,7 +392,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
   },
   clearButton: {
     padding: 8,
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     borderRadius: 12,
     padding: 4,
   },
@@ -417,15 +418,15 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   activeTab: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: Colors.surface.primary,
   },
   tabText: {
     fontSize: 14,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.text.secondary,
   },
   activeTabText: {
-    color: '#fff',
+    color: Colors.text.primary,
     fontWeight: 'bold',
   },
   scrollContent: {
@@ -437,7 +438,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
     marginBottom: 15,
   },
   statsGrid: {
@@ -446,7 +447,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     borderRadius: 12,
     padding: 15,
     width: '48%',
@@ -456,16 +457,16 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
     marginBottom: 5,
   },
   statLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.text.secondary,
     textAlign: 'center',
   },
   timeStats: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     borderRadius: 12,
     padding: 15,
   },
@@ -475,19 +476,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: Colors.border.primary,
   },
   timeLabel: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.text.secondary,
   },
   timeValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
   },
   recentGames: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.surface.primary,
     borderRadius: 12,
     padding: 15,
   },
@@ -497,14 +498,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: Colors.border.primary,
   },
   gameInfo: {
     flex: 1,
   },
   gameDate: {
     fontSize: 14,
-    color: '#fff',
+    color: Colors.text.primary,
     marginBottom: 4,
   },
   gameDifficulty: {
@@ -517,7 +518,7 @@ const styles = StyleSheet.create({
   gameTime: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: Colors.text.primary,
     marginBottom: 4,
   },
   completionStatus: {
@@ -529,10 +530,10 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   completedText: {
-    color: '#4CAF50',
+    color: Colors.status.success,
   },
   abandonedOrLostText: {
-    color: '#f44336',
+    color: Colors.status.error,
     fontSize: 14,
     marginLeft: 4,
   },
@@ -542,12 +543,12 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.text.secondary,
     marginTop: 10,
   },
   emptySubtext: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: Colors.text.tertiary,
     marginTop: 5,
     textAlign: 'center',
   },
@@ -558,7 +559,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.text.secondary,
   },
   gamesPlayedCard: {
     width: '100%', // Take full width for Games Played

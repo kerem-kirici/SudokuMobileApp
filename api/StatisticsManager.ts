@@ -329,7 +329,7 @@ export class StatisticsManager {
     return {
       totalGamesPlayed: 0,
       totalTimePlayed: 0,
-      fastestTime: Infinity, 
+      fastestTime: Infinity,
       slowestTime: 0,
       gamesCompleted: 0,
       gamesAbandoned: 0,

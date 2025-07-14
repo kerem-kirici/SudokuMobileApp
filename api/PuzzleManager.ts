@@ -4,7 +4,7 @@ import generateSudoku from './SudokuFetchAPI';
 
 const ALL_PUZZLES_STORAGE_KEY = 'all_sudoku_puzzles';
 const CURRENT_PUZZLE_STORAGE_KEY = 'current_sudoku_puzzle';
-const MIN_PUZZLES_PER_DIFFICULTY = 10;
+const MIN_PUZZLES_PER_DIFFICULTY = 20;
 
 interface PuzzleCache {
   hard: Sudoku[];
@@ -35,7 +35,7 @@ export async function EnsurePuzzleCache() {
       medium: existingPuzzleCache.medium.length,
       easy: existingPuzzleCache.easy.length,
     });
-
+    
     // Check if we need more puzzles for each difficulty
     const difficulties = ['hard', 'medium', 'easy'] as const;
     let totalPuzzlesNeeded = 0;
@@ -55,7 +55,7 @@ export async function EnsurePuzzleCache() {
         try {
           const puzzleData = await generateSudoku();
           const difficulty = puzzleData.difficulty.toLowerCase() as keyof PuzzleCache;
-          
+              
           // Check if we need more puzzles of this difficulty
           if (existingPuzzleCache[difficulty].length < MIN_PUZZLES_PER_DIFFICULTY) {
             existingPuzzleCache[difficulty].push(puzzleData);

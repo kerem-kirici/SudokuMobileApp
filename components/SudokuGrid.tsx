@@ -40,11 +40,13 @@ export default function SudokuGrid({
     const BORDER_WIDTH_EDGE = 3;
 
     const windowWidth = Dimensions.get('window').width;
+    const windowHeight = Dimensions.get('window').height;
+    const gridSize = Math.min(windowWidth * 0.9, windowHeight * 0.6); // 80% of height or full width, whichever is smaller
+    const cellSize = Math.floor(gridSize / 9);
 
-    const cellSize = {
-      width: Math.floor(windowWidth * 0.1),
-      height: Math.floor(windowWidth * 0.1),
-    };
+    // Font sizes as a proportion of cell size
+    const mainFontSize = cellSize * 0.55; // 60% of cell
+    const noteFontSize = cellSize * 0.20; // 20% of cell
 
     const borderWidth = {
       borderTopWidth: !isThirdRowTopBorder ? BORDER_WIDTH : 
@@ -65,7 +67,7 @@ export default function SudokuGrid({
           style={[
             borderWidth,
             styles.cell,
-            cellSize,
+            { width: cellSize, height: cellSize },
             isSelected && styles.selectedCell,
             !isSelected && (isInSameRow || isInSameCol || isInSameBox) && styles.highlightedCell,
           ]}
@@ -78,6 +80,7 @@ export default function SudokuGrid({
                 key={num}
                 style={[
                   styles.noteText,
+                  { fontSize: noteFontSize },
                   value.includes(num) && styles.noteTextVisible,
                   !value.includes(num) && styles.noteTextHidden,
                   !isSelected && selectedCell && num === sudoku.puzzle[selectedCell[0]][selectedCell[1]] && {
@@ -101,7 +104,7 @@ export default function SudokuGrid({
         style={[
           borderWidth,
           styles.cell,
-          cellSize,
+          { width: cellSize, height: cellSize },
           isSelected && styles.selectedCell,
           !isSelected && isOriginal && styles.originalCell,
           !isSelected && isSameValue && styles.sameValueCell,
@@ -112,11 +115,14 @@ export default function SudokuGrid({
       >
         <Text style={[
           styles.cellText,
+          { fontSize: mainFontSize },
           isSelected && styles.selectedCellText,
           !isSelected && isOriginal && styles.originalCellText,
           !isSelected && isSameValue && styles.sameValueCellText,
           !isOriginal && isCorrect && styles.correctCellText,
           !isOriginal && !isCorrect && styles.incorrectCellText,
+          !isOriginal && isSelected && isCorrect && styles.correctCellSelectedText,
+          !isOriginal && isSelected && !isCorrect && styles.incorrectCellSelectedText,
         ]}>
           {value !== 0 ? value : ''}
         </Text>
@@ -173,14 +179,14 @@ const styles = StyleSheet.create({
   },
   cellText: {
     color: Colors.text.primary,
-    fontSize: 18,
-    fontWeight: '400',
+    fontWeight: '500',
   },
   originalCellText: {
     color: Colors.numbers.original,
   },
   selectedCellText: {
     color: Colors.numbers.selected,
+    fontWeight: '800',
   },
   correctCellText: {
     color: Colors.numbers.correct,
@@ -188,10 +194,10 @@ const styles = StyleSheet.create({
   },
   incorrectCellText: {
     color: Colors.numbers.incorrect,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   sameValueCellText: {
-    fontWeight: '900',
+    fontWeight: '800',
   },
   notesGrid: {
     flexDirection: 'row',
@@ -203,13 +209,10 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   noteText: {
-    fontSize: 10,
-    fontWeight: '100',
     color: Colors.text.notes,
     textAlign: 'center',
-    width: '31%',
-    height: '31%',
-    textAlignVertical: 'center',
+    width: '33.33%',
+    height: '33.33%',
   },
   noteTextVisible: {
     color: Colors.numbers.notes.visible,
@@ -217,5 +220,13 @@ const styles = StyleSheet.create({
   },
   noteTextHidden: {
     color: Colors.numbers.notes.hidden,
+  },
+  correctCellSelectedText: {
+    color: Colors.numbers.correct,
+    fontWeight: '800',
+  },
+  incorrectCellSelectedText: {
+    color: Colors.numbers.incorrect,
+    fontWeight: '800',
   },
 }); 

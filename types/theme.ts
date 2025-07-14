@@ -44,6 +44,7 @@ export const Colors = {
     muted: 'rgba(255, 255, 255, 0.6)', // Muted text
     disabled: 'rgba(255, 255, 255, 0.5)', // Disabled text
     notes: 'rgba(210, 210, 210, 0.50)', // Notes text
+    notesButtons: 'rgba(255, 82, 126, 0.87)',
   },
 
   // Sudoku Grid Colors
@@ -61,7 +62,7 @@ export const Colors = {
     original: 'rgb(69, 129, 233)', // Original numbers (blue)
     correct: 'rgba(76, 175, 80, 1)', // Correct numbers (green)
     incorrect: 'rgba(244, 67, 54, 1)', // Incorrect numbers (red)
-    selected: 'rgba(255, 255, 255, 1)', // Selected cell text
+    selected: 'rgb(151, 179, 255)', // Selected cell text
     notes: {
       visible: 'rgba(200, 200, 200, 0.6)', // Visible notes
       hidden: 'transparent', // Hidden notes
